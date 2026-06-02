@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>WorkNote</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0C0E13;--s1:#13151D;--s2:#1B1E28;--border:#242736;
+  --t1:#ECEEF5;--t2:#6B7089;--accent:#FF6535;
+  --green:#22C55E;--red:#EF4444;--yellow:#F59E0B;--blue:#60A5FA;--purple:#A78BFA;
+}
+html,body{height:100%;background:var(--bg);color:var(--t1);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:15px;line-height:1.5;overflow-x:hidden}
+.app{max-width:480px;margin:0 auto;min-height:100vh}
+.hdr{position:sticky;top:0;z-index:50;background:var(--bg);
+  padding:13px 18px 10px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-box{width:34px;height:34px;border-radius:10px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo h1{font-size:19px;font-weight:800;letter-spacing:-.5px}
+.logo h1 span{color:var(--accent)}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.uchip{background:var(--red);color:#fff;font-size:11px;font-weight:700;
+  padding:4px 10px;border-radius:20px;display:none;animation:blink 2s ease-in-out infinite}
+.gs-dot{width:9px;height:9px;border-radius:50%;background:var(--border);display:none}
+.gs-dot.on{background:var(--green);display:block}
+.gs-dot.off{background:var(--red);display:block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+.content{padding:16px 16px 104px}
+.view{display:none}.view.active{display:block}
+.ptitle{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:3px}
+.psub{font-size:13px;color:var(--t2);margin-bottom:20px}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--s1);
+  border-top:1px solid var(--border);display:flex;
+  padding:6px 0 calc(8px + env(safe-area-inset-bottom));z-index:50;
+  max-width:480px;margin:0 auto}
+.nbtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 4px;background:none;border:none;cursor:pointer;
+  color:var(--t2);font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;transition:color .15s;font-family:inherit}
+.nbtn.active{color:var(--accent)}
+.nico{font-size:22px;line-height:1}
+.nbtn.addbtn{position:relative;top:-10px}
+.nbtn.addbtn .nico{width:50px;height:50px;background:var(--accent);
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;box-shadow:0 4px 22px rgba(255,101,53,.45);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:13px 10px;text-align:center}
+.snum{font-size:26px;font-weight:800;line-height:1}
+.slbl{font-size:11px;color:var(--t2);font-weight:600;margin-top:3px}
+.ubanner{background:linear-gradient(135deg,rgba(255,101,53,.18),rgba(255,101,53,.06));
+  border:1px solid rgba(255,101,53,.28);border-radius:12px;padding:14px;margin-bottom:14px}
+.uhead{font-size:11px;font-weight:800;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.uitem{display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.uitem:last-child{border-bottom:none}
+.udot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.utitle{font-size:13px;font-weight:700}
+.usub{font-size:11px;color:var(--t2)}
+.slabel{font-size:11px;font-weight:800;color:var(--t2);
+  text-transform:uppercase;letter-spacing:.1em;margin:18px 0 10px}
+.ncard{background:var(--s1);border:1px solid var(--border);
+  border-left:4px solid var(--border);border-radius:12px;
+  padding:13px 14px;margin-bottom:9px;transition:opacity .2s;position:relative}
+.ncard.done{opacity:.4}
+.ncat{display:inline-flex;align-items:center;gap:3px;
+  font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;margin-bottom:5px}
+.ntitle{font-weight:700;font-size:15px;line-height:1.4}
+.ncard.done .ntitle{text-decoration:line-through}
+.nbody{font-size:13px;color:var(--t2);line-height:1.6;margin-top:4px}
+.nfoot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px}
+.nmeta{font-size:11px;color:var(--t2);display:flex;flex-wrap:wrap;gap:7px;flex:1}
+.nacts{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.ibtn{width:32px;height:32px;border-radius:8px;border:none;background:var(--s2);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:var(--t2);transition:background .15s}
+.ibtn:active{background:var(--border)}
+.sync-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;
+  position:absolute;top:10px;right:10px}
+.sb-synced{background:rgba(34,197,94,.15);color:var(--green)}
+.sb-local{background:rgba(245,158,11,.12);color:var(--yellow)}
+.c-task{border-left-color:#F59E0B!important}
+.c-instruct{border-left-color:#60A5FA!important}
+.c-decision{border-left-color:#A78BFA!important}
+.c-deadline{border-left-color:#EF4444!important}
+.p-task{background:rgba(245,158,11,.14);color:#F59E0B}
+.p-instruct{background:rgba(96,165,250,.14);color:#60A5FA}
+.p-decision{background:rgba(167,139,250,.14);color:#A78BFA}
+.p-deadline{background:rgba(239,68,68,.14);color:#EF4444}
+.fgrp{margin-bottom:18px}
+.flbl{display:block;font-size:11px;font-weight:800;color:var(--t2);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.finp,.ftxt{width:100%;background:var(--s1);border:1.5px solid var(--border);
+  border-radius:11px;padding:12px 14px;color:var(--t1);font-size:15px;
+  font-family:inherit;outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none}
+.finp:focus,.ftxt:focus{border-color:var(--accent)}
+.ftxt{resize:none;line-height:1.6}
+.catgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.copt{padding:10px 12px;border-radius:10px;border:2px solid var(--border);
+  background:var(--s2);cursor:pointer;font-size:13px;font-weight:700;
+  display:flex;align-items:center;gap:6px;transition:all .15s;
+  color:var(--t2);font-family:inherit}
+.copt[data-c="task"].sel{border-color:#F59E0B;color:#F59E0B;background:rgba(245,158,11,.1)}
+.copt[data-c="instruct"].sel{border-color:#60A5FA;color:#60A5FA;background:rgba(96,165,250,.1)}
+.copt[data-c="decision"].sel{border-color:#A78BFA;color:#A78BFA;background:rgba(167,139,250,.1)}
+.copt[data-c="deadline"].sel{border-color:#EF4444;color:#EF4444;background:rgba(239,68,68,.1)}
+.drow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btnsave{width:100%;padding:15px;background:var(--accent);color:#fff;
+  border:none;border-radius:12px;font-size:16px;font-weight:800;
+  cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(255,101,53,.35);
+  transition:transform .1s}
+.btnsave:active{transform:scale(.97)}
+input[type="date"],input[type="time"]{color-scheme:dark}
+.swrap{position:relative;margin-bottom:12px}
+.swrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:16px;pointer-events:none}
+.sinp{width:100%;background:var(--s1);border:1.5px solid var(--border);
+  border-radius:11px;padding:11px 12px 11px 38px;color:var(--t1);
+  font-size:14px;outline:none;font-family:inherit;-webkit-appearance:none}
+.frow{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;
+  margin-bottom:12px;scrollbar-width:none}
+.frow::-webkit-scrollbar{display:none}
+.fpill{flex-shrink:0;padding:5px 12px;border-radius:20px;
+  border:1.5px solid var(--border);background:none;color:var(--t2);
+  font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.fp-all{background:var(--accent);color:#fff;border-color:var(--accent)}
+.fp-task{background:rgba(245,158,11,.15);color:#F59E0B;border-color:#F59E0B}
+.fp-ins{background:rgba(96,165,250,.15);color:#60A5FA;border-color:#60A5FA}
+.fp-dec{background:rgba(167,139,250,.15);color:#A78BFA;border-color:#A78BFA}
+.fp-dead{background:rgba(239,68,68,.15);color:#EF4444;border-color:#EF4444}
+.fp-done{background:rgba(34,197,94,.15);color:#22C55E;border-color:#22C55E}
+.empty{text-align:center;padding:56px 20px 36px;color:var(--t2)}
+.eico{font-size:52px;margin-bottom:12px}
+.etitle{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.esub{font-size:13px;line-height:1.6}
+#toast{position:fixed;bottom:86px;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:#1C1F2A;color:var(--t1);border:1px solid var(--border);
+  font-weight:600;padding:10px 18px;border-radius:20px;font-size:13px;
+  z-index:999;opacity:0;transition:opacity .25s,transform .25s;
+  pointer-events:none;white-space:nowrap;max-width:calc(100vw - 32px)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Settings tab */
+.setup-card{background:linear-gradient(135deg,var(--s1),#0f1a14);
+  border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:20px;margin-bottom:18px}
+.setup-card h3{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.setup-card p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px}
+.conn-row{display:flex;gap:8px;margin-bottom:8px}
+.conn-inp{flex:1;background:var(--s2);border:1.5px solid var(--border);
+  border-radius:10px;padding:11px 12px;color:var(--t1);font-size:13px;
+  font-family:inherit;outline:none;min-width:0}
+.conn-inp:focus{border-color:var(--green)}
+.btn-connect{padding:11px 16px;background:var(--green);color:#000;
+  border:none;border-radius:10px;font-weight:800;font-size:13px;
+  cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.btn-disconnect{padding:11px 16px;background:rgba(239,68,68,.15);color:var(--red);
+  border:1px solid rgba(239,68,68,.25);border-radius:10px;font-weight:700;
+  font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.conn-status{font-size:12px;color:var(--t2);margin-top:4px;min-height:18px}
+.steps{margin-top:4px}
+.step{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:var(--accent);flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;line-height:1.6;color:var(--t2);flex:1}
+.step-text strong{color:var(--t1)}
+.code-block{background:#0a0c10;border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin:10px 0;font-family:'Courier New',monospace;
+  font-size:11px;color:#86efac;line-height:1.7;overflow-x:auto;white-space:pre}
+.btn-copy{display:block;width:100%;padding:10px;background:var(--s2);
+  border:1px solid var(--border);border-radius:9px;color:var(--t2);
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;
+  transition:background .15s}
+.btn-copy:active{background:var(--border)}
+.btn-syncall{display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:12px;background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.25);border-radius:11px;
+  color:var(--green);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;margin-bottom:16px}
+.nstatus{display:flex;align-items:center;gap:9px;background:var(--s1);
+  border:1px solid var(--border);border-radius:10px;padding:11px 14px;
+  margin-bottom:14px;font-size:13px}
+.ndot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ncard2{background:linear-gradient(135deg,var(--s1),#191430);
+  border:1px solid rgba(167,139,250,.28);border-radius:14px;
+  padding:20px;text-align:center;margin-bottom:16px}
+.ncard2 h3{font-size:16px;font-weight:800;margin-bottom:6px}
+.ncard2 p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:14px}
+.btnpur{background:var(--purple);color:#fff;border:none;border-radius:10px;
+  padding:11px 22px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.upitem{display:flex;align-items:center;gap:12px;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:11px;padding:12px 14px;margin-bottom:8px}
+.upday{min-width:46px;text-align:center}
+.upday .dn{font-size:22px;font-weight:800;line-height:1}
+.upday .dm{font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase}
+.upinfo{flex:1}
+.uptitle{font-size:14px;font-weight:700}
+.upsub{font-size:11px;color:var(--t2);margin-top:2px}
+.badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;flex-shrink:0}
+.bover{background:rgba(239,68,68,.15);color:var(--red)}
+.btoday{background:rgba(255,101,53,.15);color:var(--accent)}
+.bsoon{background:rgba(245,158,11,.15);color:var(--yellow)}
+.bok{background:rgba(34,197,94,.1);color:var(--green)}
+.divider{height:1px;background:var(--border);margin:20px 0}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-box">🧠</div>
+    <h1>Work<span>Note</span></h1>
+  </div>
+  <div class="hdr-right">
+    <div class="gs-dot" id="gs-dot" title="Google Sheets sync status"></div>
+    <div class="uchip" id="uchip">⚠ <span id="ucnt">0</span> urgent</div>
+  </div>
+</header>
+
+<!-- HOME -->
+<div id="v-home" class="content view active">
+  <div class="ptitle">Good day 👋</div>
+  <div class="psub">Here's what needs your attention</div>
+  <div class="stats">
+    <div class="stat"><div class="snum" id="s-total" style="color:var(--accent)">0</div><div class="slbl">Total</div></div>
+    <div class="stat"><div class="snum" id="s-pend"  style="color:var(--yellow)">0</div><div class="slbl">Pending</div></div>
+    <div class="stat"><div class="snum" id="s-done"  style="color:var(--green)">0</div><div class="slbl">Done</div></div>
+  </div>
+  <div id="home-urgent"></div>
+  <div class="slabel">Recent Notes</div>
+  <div id="home-recent"></div>
+</div>
+
+<!-- NOTES -->
+<div id="v-notes" class="content view">
+  <div class="ptitle">All Notes</div>
+  <div class="psub">Everything you've saved</div>
+  <div class="swrap"><span>🔍</span><input class="sinp" id="sinp" placeholder="Search notes…" oninput="renderNotes()"></div>
+  <div class="frow">
+    <button class="fpill fp-all" data-f="all"      onclick="setF(this)">All</button>
+    <button class="fpill"        data-f="task"      onclick="setF(this)">✓ Tasks</button>
+    <button class="fpill"        data-f="instruct"  onclick="setF(this)">📋 Instructions</button>
+    <button class="fpill"        data-f="decision"  onclick="setF(this)">⚡ Decisions</button>
+    <button class="fpill"        data-f="deadline"  onclick="setF(this)">🗓 Deadlines</button>
+    <button class="fpill"        data-f="done"      onclick="setF(this)">✅ Done</button>
+  </div>
+  <div id="nlist"></div>
+</div>
+
+<!-- ADD -->
+<div id="v-add" class="content view">
+  <div class="ptitle">Add a Note</div>
+  <div class="psub">Save what you've been told before you forget</div>
+  <div class="fgrp">
+    <label class="flbl">Category</label>
+    <div class="catgrid">
+      <button class="copt sel" data-c="task"     onclick="selCat(this)">✓ Task</button>
+      <button class="copt"     data-c="instruct" onclick="selCat(this)">📋 Instruction</button>
+      <button class="copt"     data-c="decision" onclick="selCat(this)">⚡ Decision</button>
+      <button class="copt"     data-c="deadline" onclick="selCat(this)">🗓 Deadline</button>
+    </div>
+  </div>
+  <div class="fgrp">
+    <label class="flbl">Title *</label>
+    <input id="inp-title" class="finp" type="text" placeholder="e.g. Submit report to Sarah by Friday">
+  </div>
+  <div class="fgrp">
+    <label class="flbl">Details</label>
+    <textarea id="inp-body" class="ftxt" rows="4" placeholder="Add more context or instructions…"></textarea>
+  </div>
+  <div class="fgrp">
+    <label class="flbl">Deadline & Reminder (optional)</label>
+    <div class="drow">
+      <input id="inp-date" class="finp" type="date" style="font-size:14px">
+      <input id="inp-time" class="finp" type="time" style="font-size:14px">
+    </div>
+    <div style="font-size:12px;color:var(--t2);margin-top:6px">📌 Date + time = reminder notification</div>
+  </div>
+  <button class="btnsave" onclick="addNote()">💾 Save Note</button>
+</div>
+
+<!-- SETTINGS -->
+<div id="v-settings" class="content view">
+  <div class="ptitle">Settings</div>
+  <div class="psub">Connect Google Sheets & manage reminders</div>
+
+  <!-- Google Sheets Setup -->
+  <div class="setup-card">
+    <h3>📊 Google Sheets Sync</h3>
+    <p>Every note you save will automatically appear as a new row in your Google Sheet. Follow the steps below once to set it up.</p>
+
+    <div class="conn-row">
+      <input class="conn-inp" id="gs-url" type="url" placeholder="Paste your Apps Script URL here…">
+      <button class="btn-connect" id="btn-conn" onclick="connectSheet()">Connect</button>
+    </div>
+    <div class="conn-status" id="conn-status"></div>
+  </div>
+
+  <button class="btn-syncall" id="btn-syncall" onclick="syncAll()" style="display:none">
+    ⟳ Sync All Unsynced Notes to Sheet
+  </button>
+
+  <!-- How to set up -->
+  <div class="slabel">How to set it up (one time)</div>
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:16px">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to <strong>sheets.google.com</strong> and create a new blank spreadsheet</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Click <strong>Extensions → Apps Script</strong> in the top menu</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Delete all existing code and paste this code:</div>
+      </div>
+    </div>
+    <div class="code-block" id="code-block">function doGet(e) {
+  var sheet = SpreadsheetApp
+    .getActiveSpreadsheet()
+    .getSheets()[0];
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      'ID','Category','Title',
+      'Details','Deadline','Saved At'
+    ]);
+  }
+  var p = e.parameter;
+  var cats = {
+    task:'Task', instruct:'Instruction',
+    decision:'Decision', deadline:'Deadline'
+  };
+  sheet.appendRow([
+    p.id, cats[p.cat]||p.cat,
+    p.title, p.body||'',
+    p.deadline||'',
+    new Date(Number(p.ca)).toLocaleString()
+  ]);
+  return ContentService
+    .createTextOutput('ok');
+}</div>
+    <button class="btn-copy" onclick="copyCode()">📋 Copy Code</button>
+    <div class="steps" style="margin-top:4px">
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Click the <strong>💾 Save</strong> icon (or Ctrl+S)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Click <strong>Deploy → New Deployment</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-text">Set type to <strong>Web app</strong>, Execute as: <strong>Me</strong>, Who has access: <strong>Anyone</strong> → Click <strong>Deploy</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-text"><strong>Copy the URL</strong> it gives you and paste it in the field above → tap Connect</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="slabel">Reminder Notifications</div>
+  <div class="nstatus">
+    <div class="ndot" id="ndot" style="background:var(--yellow)"></div>
+    <span id="nlbl">Checking notification status…</span>
+  </div>
+  <div class="ncard2" id="ncard2">
+    <div style="font-size:36px;margin-bottom:10px">🔔</div>
+    <h3>Enable Notifications</h3>
+    <p>Allow notifications so WorkNote can alert you when a deadline is near. Works when this page is open in Chrome.</p>
+    <button class="btnpur" onclick="askPerm()">Enable Notifications</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="slabel">Upcoming Deadlines</div>
+  <div id="uplist"></div>
+</div>
+
+</div>
+
+<nav class="bnav">
+  <button class="nbtn active" data-v="home"     onclick="goV('home',this)"><span class="nico">🏠</span>Home</button>
+  <button class="nbtn"        data-v="notes"    onclick="goV('notes',this)"><span class="nico">📝</span>Notes</button>
+  <button class="nbtn addbtn" data-v="add"      onclick="goV('add',this)"><span class="nico" style="display:flex">＋</span></button>
+  <button class="nbtn"        data-v="settings" onclick="goV('settings',this)"><span class="nico">⚙️</span>Settings</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+var notes = [];
+var filt = 'all';
+var curCat = 'task';
+var KEY = 'worknote_v3';
+var NKEY = 'worknote_notified';
+var GSKEY = 'worknote_gsurl';
+
+var CATS = {
+  task:     {label:'Task',        icon:'✓',  col:'#F59E0B', cls:'task'},
+  instruct: {label:'Instruction', icon:'📋', col:'#60A5FA', cls:'instruct'},
+  decision: {label:'Decision',    icon:'⚡', col:'#A78BFA', cls:'decision'},
+  deadline: {label:'Deadline',    icon:'🗓', col:'#EF4444', cls:'deadline'},
+};
+
+// ── Init ──
+function init() {
+  try { var r = localStorage.getItem(KEY); if (r) notes = JSON.parse(r); } catch(e) {}
+  document.getElementById('inp-date').value = todayStr();
+  var saved = localStorage.getItem(GSKEY) || '';
+  if (saved) {
+    document.getElementById('gs-url').value = saved;
+    setConnStatus(true, saved);
+  }
+  renderAll();
+  checkNotif();
+  setInterval(checkReminders, 60000);
+  checkReminders();
+}
+
+function saveNotes() {
+  try { localStorage.setItem(KEY, JSON.stringify(notes)); } catch(e) {}
+  renderAll();
+}
+
+function renderAll() { renderHome(); renderNotes(); renderReminders(); updateSyncAllBtn(); }
+
+// ── Nav ──
+function goV(id, btn) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nbtn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('v-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── Home ──
+function renderHome() {
+  var total = notes.length;
+  var doneN = notes.filter(function(n) { return n.done; }).length;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-pend').textContent  = total - doneN;
+  document.getElementById('s-done').textContent  = doneN;
+
+  var urgent = notes.filter(function(n) { return !n.done && n.dl && daysUntil(n.dl) <= 2; });
+  var chip = document.getElementById('uchip');
+  document.getElementById('ucnt').textContent = urgent.length;
+  chip.style.display = urgent.length > 0 ? '' : 'none';
+
+  var uel = document.getElementById('home-urgent');
+  if (urgent.length) {
+    var h = '<div class="ubanner"><div class="uhead">⚠ Needs Attention</div>';
+    urgent.slice(0, 5).forEach(function(n) {
+      var d = daysUntil(n.dl);
+      var ds = d < 0 ? Math.abs(d) + 'd overdue' : d === 0 ? 'Today!' : d + 'd left';
+      var col = d < 0 ? '#EF4444' : d === 0 ? '#FF6535' : '#F59E0B';
+      h += '<div class="uitem"><div class="udot" style="background:' + col + '"></div>'
+        + '<div><div class="utitle">' + esc(n.title) + '</div>'
+        + '<div class="usub">' + ds + ' · ' + (CATS[n.cat] || CATS.task).label + '</div></div></div>';
+    });
+    h += '</div>';
+    uel.innerHTML = h;
+  } else {
+    uel.innerHTML = '<div style="text-align:center;padding:14px 0;font-size:13px;color:var(--t2)">🎉 No urgent items right now!</div>';
+  }
+
+  var recent = notes.slice().sort(function(a, b) { return b.ca - a.ca; }).slice(0, 5);
+  var rel = document.getElementById('home-recent');
+  rel.innerHTML = recent.length ? recent.map(cardHTML).join('') :
+    '<div class="empty"><div class="eico">📭</div><div class="etitle">No notes yet</div><div class="esub">Tap the <strong>+</strong> button to save your first note</div></div>';
+}
+
+// ── Notes ──
+function setF(btn) {
+  filt = btn.dataset.f;
+  document.querySelectorAll('.fpill').forEach(function(p) { p.className = 'fpill'; });
+  var map = {all:'fp-all', task:'fp-task', instruct:'fp-ins', decision:'fp-dec', deadline:'fp-dead', done:'fp-done'};
+  btn.classList.add(map[filt] || 'fp-all');
+  renderNotes();
+}
+
+function renderNotes() {
+  var q = (document.getElementById('sinp').value || '').toLowerCase();
+  var list = notes.filter(function(n) {
+    var mc = filt === 'all' ? true : filt === 'done' ? n.done : (n.cat === filt && !n.done);
+    var mq = !q || n.title.toLowerCase().indexOf(q) >= 0 || (n.body || '').toLowerCase().indexOf(q) >= 0;
+    return mc && mq;
+  });
+  list.sort(function(a, b) {
+    if (!a.done && b.done) return -1;
+    if (a.done && !b.done) return 1;
+    if (a.dl && b.dl) return new Date(a.dl) - new Date(b.dl);
+    if (a.dl) return -1; if (b.dl) return 1;
+    return b.ca - a.ca;
+  });
+  var el = document.getElementById('nlist');
+  el.innerHTML = list.length ? list.map(cardHTML).join('') :
+    '<div class="empty"><div class="eico">🔍</div><div class="etitle">No notes found</div><div class="esub">Try a different search or filter</div></div>';
+}
+
+// ── Card HTML ──
+function cardHTML(n) {
+  var c = CATS[n.cat] || CATS.task;
+  var d = n.dl ? daysUntil(n.dl) : null;
+  var dlStr = '';
+  if (d !== null) {
+    var dc = d < 0 ? '#EF4444' : d <= 2 ? '#F59E0B' : '#6B7089';
+    var dt = d < 0 ? Math.abs(d) + 'd overdue' : d === 0 ? 'Today!' : d + 'd left';
+    dlStr = '<span style="color:' + dc + '">🗓 ' + fmtDate(n.dl) + ' · ' + dt + '</span>';
+  }
+  var gsUrl = localStorage.getItem(GSKEY);
+  var syncBadge = gsUrl
+    ? (n.synced
+        ? '<span class="sync-badge sb-synced">📊 Synced</span>'
+        : '<span class="sync-badge sb-local">📱 Local</span>')
+    : '';
+  return '<div class="ncard ' + (n.done ? 'done ' : '') + 'c-' + c.cls + '">'
+    + syncBadge
+    + '<span class="ncat p-' + c.cls + '">' + c.icon + ' ' + c.label + '</span>'
+    + '<div class="ntitle">' + esc(n.title) + '</div>'
+    + (n.body ? '<div class="nbody">' + esc(n.body) + '</div>' : '')
+    + '<div class="nfoot">'
+      + '<div class="nmeta"><span>' + ago(n.ca) + '</span>' + dlStr + '</div>'
+      + '<div class="nacts">'
+        + '<button class="ibtn" onclick="toggle(\'' + n.id + '\')" title="' + (n.done ? 'Undo' : 'Done') + '">' + (n.done ? '↩' : '✓') + '</button>'
+        + '<button class="ibtn" onclick="del(\'' + n.id + '\')" style="color:var(--red)">🗑</button>'
+      + '</div>'
+    + '</div></div>';
+}
+
+// ── Reminders ──
+function renderReminders() {
+  var list = notes.filter(function(n) { return !n.done && n.dl; })
+    .sort(function(a, b) { return new Date(a.dl) - new Date(b.dl); });
+  var el = document.getElementById('uplist');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty"><div class="eico">🗓</div><div class="etitle">No deadlines set</div><div class="esub">Add a note with a deadline to see it here</div></div>';
+    return;
+  }
+  el.innerHTML = list.map(function(n) {
+    var d = daysUntil(n.dl);
+    var date = new Date(n.dl + 'T12:00:00');
+    var day = date.getDate();
+    var mon = date.toLocaleDateString('en-US', {month:'short'});
+    var dow = date.toLocaleDateString('en-US', {weekday:'short'});
+    var bc = d < 0 ? 'bover' : d === 0 ? 'btoday' : d <= 3 ? 'bsoon' : 'bok';
+    var bt = d < 0 ? Math.abs(d) + 'd overdue' : d === 0 ? 'Today!' : d + 'd left';
+    var c = CATS[n.cat] || CATS.task;
+    return '<div class="upitem">'
+      + '<div class="upday"><div class="dn" style="color:' + c.col + '">' + day + '</div>'
+      + '<div class="dm">' + mon + '</div><div class="dm">' + dow + '</div></div>'
+      + '<div class="upinfo"><div class="uptitle">' + esc(n.title) + '</div>'
+      + '<div class="upsub">' + c.icon + ' ' + c.label + (n.rt ? ' · ⏰ ' + fmtTime(n.rt) : '') + '</div></div>'
+      + '<span class="badge ' + bc + '">' + bt + '</span></div>';
+  }).join('');
+}
+
+// ── Add Note ──
+function selCat(btn) {
+  document.querySelectorAll('.copt').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+  curCat = btn.dataset.c;
+}
+
+function addNote() {
+  var title = document.getElementById('inp-title').value.trim();
+  if (!title) { toast('⚠ Please enter a title'); return; }
+  var body  = document.getElementById('inp-body').value.trim();
+  var dv    = document.getElementById('inp-date').value;
+  var tv    = document.getElementById('inp-time').value;
+  var n = {
+    id: Date.now().toString(),
+    cat: curCat, title: title, body: body,
+    dl: dv || null,
+    rt: (dv && tv) ? dv + 'T' + tv : null,
+    done: false, synced: false,
+    ca: Date.now()
+  };
+  notes.unshift(n);
+  saveNotes();
+  document.getElementById('inp-title').value = '';
+  document.getElementById('inp-body').value  = '';
+  document.getElementById('inp-time').value  = '';
+  document.getElementById('inp-date').value  = todayStr();
+  toast('💾 Saved locally…');
+  goV('home', document.querySelector('[data-v="home"]'));
+  syncNote(n, true);
+}
+
+// ── Google Sheets Sync ──
+function connectSheet() {
+  var url = document.getElementById('gs-url').value.trim();
+  if (!url || url.indexOf('script.google.com') < 0) {
+    toast('⚠ Please paste a valid Apps Script URL');
+    return;
+  }
+  localStorage.setItem(GSKEY, url);
+  setConnStatus(true, url);
+  toast('✅ Google Sheets connected!');
+  updateSyncAllBtn();
+  renderAll();
+}
+
+function disconnectSheet() {
+  localStorage.removeItem(GSKEY);
+  document.getElementById('gs-url').value = '';
+  setConnStatus(false, '');
+  toast('Disconnected from Google Sheets');
+  updateSyncAllBtn();
+  renderAll();
+}
+
+function setConnStatus(connected, url) {
+  var dot  = document.getElementById('gs-dot');
+  var stat = document.getElementById('conn-status');
+  var btn  = document.getElementById('btn-conn');
+  if (connected) {
+    dot.className  = 'gs-dot on';
+    stat.innerHTML = '<span style="color:var(--green)">✅ Connected — notes will sync to your sheet on save</span>';
+    btn.textContent = 'Disconnect';
+    btn.className   = 'btn-disconnect';
+    btn.onclick     = disconnectSheet;
+  } else {
+    dot.className   = 'gs-dot off';
+    stat.innerHTML  = '';
+    btn.textContent = 'Connect';
+    btn.className   = 'btn-connect';
+    btn.onclick     = connectSheet;
+  }
+}
+
+function syncNote(n, showFeedback) {
+  var url = localStorage.getItem(GSKEY);
+  if (!url) return;
+  var params = new URLSearchParams({
+    id: n.id, cat: n.cat, title: n.title,
+    body: n.body || '', deadline: n.dl || '',
+    ca: n.ca.toString()
+  });
+  var fullUrl = url + '?' + params.toString();
+  fetch(fullUrl, {method:'GET', mode:'no-cors'})
+    .then(function() {
+      setTimeout(function() {
+        var idx = notes.findIndex(function(x) { return x.id === n.id; });
+        if (idx >= 0) { notes[idx].synced = true; saveNotes(); }
+        if (showFeedback) toast('📊 Synced to Google Sheets!');
+      }, 2000);
+    })
+    .catch(function() {
+      if (showFeedback) toast('⚠ Could not sync — saved locally');
+    });
+}
+
+function syncAll() {
+  var url = localStorage.getItem(GSKEY);
+  if (!url) { toast('Connect Google Sheets first in Settings'); return; }
+  var pending = notes.filter(function(n) { return !n.synced; });
+  if (!pending.length) { toast('All notes already synced!'); return; }
+  toast('Syncing ' + pending.length + ' notes…');
+  pending.forEach(function(n, i) {
+    setTimeout(function() { syncNote(n, i === pending.length - 1); }, i * 500);
+  });
+}
+
+function updateSyncAllBtn() {
+  var url = localStorage.getItem(GSKEY);
+  var pending = notes.filter(function(n) { return !n.synced; }).length;
+  var btn = document.getElementById('btn-syncall');
+  if (url && pending > 0) {
+    btn.style.display = '';
+    btn.innerHTML = '⟳ Sync ' + pending + ' unsynced note' + (pending > 1 ? 's' : '') + ' to Sheet';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function copyCode() {
+  var code = document.getElementById('code-block').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(function() { toast('📋 Code copied!'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = code; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('📋 Code copied!');
+  }
+}
+
+// ── Note Actions ──
+function toggle(id) {
+  var n = notes.find(function(x) { return x.id === id; });
+  if (n) { n.done = !n.done; saveNotes(); toast(n.done ? '✅ Done!' : '↩ Unmarked'); }
+}
+
+function del(id) {
+  if (!confirm('Delete this note?')) return;
+  notes = notes.filter(function(n) { return n.id !== id; });
+  saveNotes(); toast('🗑 Deleted');
+}
+
+// ── Notifications ──
+function checkNotif() {
+  var dot = document.getElementById('ndot'), lbl = document.getElementById('nlbl');
+  var card = document.getElementById('ncard2');
+  if (!('Notification' in window)) {
+    dot.style.background = 'var(--red)';
+    lbl.textContent = 'Notifications not supported in this browser';
+    card.style.display = 'none'; return;
+  }
+  if (Notification.permission === 'granted') {
+    dot.style.background = 'var(--green)';
+    lbl.textContent = '🔔 Notifications enabled';
+    card.style.display = 'none';
+  } else if (Notification.permission === 'denied') {
+    dot.style.background = 'var(--red)';
+    lbl.textContent = 'Notifications blocked — enable in Chrome settings (⋮ → Site settings)';
+    card.style.display = 'none';
+  } else {
+    dot.style.background = 'var(--yellow)';
+    lbl.textContent = 'Tap below to enable reminder notifications';
+  }
+}
+
+function askPerm() {
+  if (!('Notification' in window)) { toast('Not supported'); return; }
+  Notification.requestPermission().then(function(p) {
+    toast(p === 'granted' ? '🔔 Notifications enabled!' : 'Permission denied');
+    checkNotif();
+  });
+}
+
+function checkReminders() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  var notified = {};
+  try { notified = JSON.parse(localStorage.getItem(NKEY) || '{}'); } catch(e) {}
+  var now = Date.now();
+  notes.forEach(function(n) {
+    if (n.done || !n.rt || notified[n.id]) return;
+    if (new Date(n.rt).getTime() <= now) {
+      try { new Notification('WorkNote ⏰', {body: n.title + (n.body ? '\n' + n.body : ''), tag: n.id}); } catch(e) {}
+      notified[n.id] = true;
+      try { localStorage.setItem(NKEY, JSON.stringify(notified)); } catch(e) {}
+    }
+  });
+}
+
+// ── Utils ──
+function daysUntil(ds) {
+  var td = new Date(todayStr() + 'T00:00:00');
+  var dd = ds.split('T')[0];
+  return Math.round((new Date(dd + 'T00:00:00') - td) / 86400000);
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(ds) {
+  return new Date(ds.split('T')[0] + 'T12:00:00')
+    .toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+function fmtTime(dt) {
+  return new Date(dt).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+}
+function ago(ts) {
+  var d = Date.now() - ts, m = Math.floor(d/60000), h = Math.floor(d/3600000), dy = Math.floor(d/86400000);
+  if (m < 1) return 'just now';
+  if (m < 60) return m + 'm ago';
+  if (h < 24) return h + 'h ago';
+  if (dy < 7) return dy + 'd ago';
+  return fmtDate(new Date(ts).toISOString().split('T')[0]);
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2800);
+}
+
+Array.prototype.findIndex = Array.prototype.findIndex || function(fn) {
+  for (var i = 0; i < this.length; i++) { if (fn(this[i])) return i; }
+  return -1;
+};
+
+init();
+</script>
+</body>
+</html>
