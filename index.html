@@ -763,7 +763,14 @@ function daysUntil(ds) {
   var dd = ds.split('T')[0];
   return Math.round((new Date(dd + 'T00:00:00') - td) / 86400000);
 }
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// ✅ FIXED: Use local date instead of UTC to avoid timezone off-by-one bug
+function todayStr() {
+  var d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString().split('T')[0];
+}
+
 function fmtDate(ds) {
   return new Date(ds.split('T')[0] + 'T12:00:00')
     .toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
@@ -797,3 +804,4 @@ init();
 </script>
 </body>
 </html>
+
